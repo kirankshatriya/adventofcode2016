@@ -3,28 +3,51 @@
 var walk = function(startPos, startDir, moveArr){
   var dir = startDir;
   var pos = startPos;
+  var path = [];
+  var revisits = [];
+  var hereBefore = function(coor){
+    var wasHereBefore = false
+    path.forEach(
+      function(elem){
+        wasHereBefore = (wasHereBefore) || (elem.x === coor.x && elem.y === coor.y);
+      }
+    );
+    return wasHereBefore;
+  };
+  var printFriendlyCoor = function(pos){
+    return "(" + pos.x + "," + pos.y + ")";
+  }
+  path.push(startPos);
   moveArr.forEach(
     function(move){
       var trimmedMove = move.trim().replace(",","");
       var turnDirection = trimmedMove[0];
-      var numSteps = parseInt(trimmedMove.substring(1));
       dir = turn(dir, turnDirection);
-      var newPos = step(dir, numSteps, pos);
-      var printFriendlyCoor = function(pos){
-        return "(" + pos.x + "," + pos.y + ")";
+      var numSteps = parseInt(trimmedMove.substring(1));
+      for(var i = 0; i < numSteps; i++){
+        var pos = step(dir, 1, path[path.length-1]);
+        if(hereBefore(pos)==true){
+
+          revisits.push(pos);
+        }
+        path.push(pos);
       }
       console.log(move
         + ": "
-        + printFriendlyCoor(pos)
+        + printFriendlyCoor(path[path.length-1-numSteps])
         + " -> "
-        + printFriendlyCoor(newPos)
+        + printFriendlyCoor(path[path.length-1])
         + " and facing " + dir
       );
-
-      pos = newPos;
     }
   );
-  return pos;
+  console.log("revisits:");
+  revisits.forEach(
+    function(elem){
+        console.log(printFriendlyCoor(elem));
+    }
+  );
+  return path[path.length-1];
 };
 
 
